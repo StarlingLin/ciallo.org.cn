@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#090b18">
+    <title>柠檬蛇工厂</title>
+    <link rel="stylesheet" href="game.css">
+    <link rel="stylesheet" href="/assets/css/leaderboard.css">
+</head>
+<body>
+    <main class="snake-app" aria-label="柠檬蛇工厂">
+        <header class="game-header">
+            <div class="brand-block">
+                <span class="eyebrow">CIALLO WEBGAME 04</span>
+                <h1>柠檬蛇工厂</h1>
+            </div>
+
+            <div class="hud" aria-label="本局状态">
+                <div class="hud-item">
+                    <span>得分</span>
+                    <strong id="score-value">00000</strong>
+                </div>
+                <div class="hud-item">
+                    <span>长度</span>
+                    <strong id="length-value">12</strong>
+                </div>
+                <div class="hud-item">
+                    <span>对手</span>
+                    <strong id="bot-value">0 / 5</strong>
+                </div>
+                <div class="hud-item wide">
+                    <span>下一位竞争者</span>
+                    <strong id="spawn-value">准备中</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="stage-shell">
+            <canvas id="game-canvas"
+                    width="960"
+                    height="600"
+                    tabindex="0"
+                    aria-label="柠檬蛇工厂游戏区域。移动鼠标或使用 WASD 控制方向，按住空格加速。">
+                当前浏览器不支持 Canvas。
+            </canvas>
+
+            <div class="canvas-vignette" aria-hidden="true"></div>
+            <div class="spawn-toast" id="spawn-toast" role="status" aria-live="polite"></div>
+
+            <section class="start-panel overlay-panel" id="start-panel" aria-labelledby="start-title">
+                <span class="panel-kicker">SELECT YOUR SKIN</span>
+                <h2 id="start-title">选择本局皮肤</h2>
+                <p class="panel-description">AI 会从其余皮肤中随机选择。皮肤只影响外观，不影响速度与碰撞。</p>
+
+                <div class="skin-grid" id="skin-grid" role="list" aria-label="可选皮肤"></div>
+
+                <div class="start-actions">
+                    <button class="primary-button" id="start-button" type="button">进入地图</button>
+                    <p><kbd>鼠标</kbd> / <kbd>WASD</kbd> 转向　<kbd>Space</kbd> 消耗长度加速</p>
+                </div>
+            </section>
+
+            <section class="pause-panel overlay-panel compact" id="pause-panel" hidden aria-labelledby="pause-title">
+                <span class="panel-kicker">PAUSED</span>
+                <h2 id="pause-title">大家都停住了</h2>
+                <p>按 <kbd>P</kbd>、<kbd>Esc</kbd> 或点击按钮继续。</p>
+                <button class="primary-button" id="resume-button" type="button">继续竞逐</button>
+            </section>
+
+            <section class="game-over-panel overlay-panel compact" id="game-over-panel" hidden aria-labelledby="game-over-title">
+                <span class="panel-kicker">ROUND OVER</span>
+                <h2 id="game-over-title">撞到了！</h2>
+                <p id="game-over-detail">本局得分 0</p>
+                <div class="result-stats">
+                    <span>存活 <strong id="result-time">0:00</strong></span>
+                    <span>击败 <strong id="result-kills">0</strong></span>
+                    <span>最长 <strong id="result-length">12</strong></span>
+                </div>
+                <div class="result-actions">
+                    <button class="primary-button" id="retry-button" type="button">再来一局</button>
+                    <button class="ghost-button" id="change-skin-button" type="button">更换皮肤</button>
+                </div>
+            </section>
+        </section>
+
+        <div class="game-toolbar" aria-label="游戏控制">
+            <p class="control-hint">
+                <kbd>鼠标</kbd> / <kbd>WASD</kbd> 转向
+                <span>·</span>
+                <kbd>Space</kbd> 加速
+                <span>·</span>
+                <kbd>P</kbd> 暂停
+            </p>
+            <div class="toolbar-actions">
+                <button class="toolbar-button" id="mute-button" type="button" aria-pressed="false">♪ 声音开启</button>
+                <button class="toolbar-button" id="restart-button" type="button">↻ 重新开始</button>
+            </div>
+        </div>
+
+        <footer class="game-footer">
+            <span>纯本地规则型 AI · 无联网服务</span>
+            <span>六套角色皮肤 · AI 竞争模式</span>
+        </footer>
+    </main>
+
+    <div id="leaderboard-root" data-game-id="snake" data-game-name="柠檬蛇工厂"></div>
+    <script src="/assets/js/leaderboard.js?v=20260802-iframe-fix"></script>
+    <script src="game.config.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

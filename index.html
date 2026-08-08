@@ -7,7 +7,7 @@
     <meta name="description" content="Starling 与 ChatGPT 制作的柚子厨 HTML 小游戏聚合站。">
     <title>柚子厨的 HTML 小游戏聚合</title>
     <link rel="icon" href="/assets/icons/favicon.jpg" type="image/jpeg">
-    <link rel="stylesheet" href="/assets/css/site.css?v=20260806-beian">
+    <link rel="stylesheet" href="/assets/css/site.css?v=20260808-snake">
 </head>
 <body>
     <div class="app-shell">
@@ -75,6 +75,20 @@
                         <svg viewBox="0 0 24 24"><path d="M3 4h5v4H3zm6.5 0h5v4h-5zM16 4h5v4h-5zM3 9.5h5v4H3zm6.5 0h5v4h-5zm6.5 0h5v4h-5zM4 18h16v2H4z"/></svg>
                     </span>
                     <span>七海打饺</span>
+                </button>
+
+                <button class="tab-button"
+                        type="button"
+                        role="tab"
+                        aria-selected="false"
+                        aria-controls="game-panel"
+                        data-tab="snake"
+                        data-game-title="柠檬蛇工厂"
+                        data-game-src="/games/snake/">
+                    <span class="tab-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="M7 2a5 5 0 0 0 0 10h6a2 2 0 1 1 0 4H8a4 4 0 1 0 0 8h8v-3H8a1 1 0 1 1 0-2h5a5 5 0 1 0 0-10H7a2 2 0 1 1 0-4h9V2z"/></svg>
+                    </span>
+                    <span>柠檬蛇工厂</span>
                 </button>
             </nav>
 
@@ -150,7 +164,7 @@
                             <p class="eyebrow">GAME LIBRARY</p>
                             <h2 id="game-grid-title">小游戏收藏</h2>
                         </div>
-                        <span class="count-pill">3 GAMES</span>
+                        <span class="count-pill">4 GAMES</span>
                     </div>
 
                     <div class="cards">
@@ -192,6 +206,23 @@
                             <div class="card-copy">
                                 <h3>七海打饺</h3>
                                 <p>七海案板 · 旋转饺子</p>
+                            </div>
+                            <span class="card-arrow" aria-hidden="true">↗</span>
+                        </article>
+
+                        <article class="game-card" tabindex="0" data-open-tab="snake">
+                            <span class="card-number">04</span>
+                            <div class="card-visual visual-snake">
+                                <span class="snake-card-food snake-card-food-a"></span>
+                                <span class="snake-card-food snake-card-food-b"></span>
+                                <span class="snake-card-body"></span>
+                                <span class="snake-card-head">
+                                    <img src="/games/snake/assets/images/skins/cropped/ena.webp" alt="">
+                                </span>
+                            </div>
+                            <div class="card-copy">
+                                <h3>柠檬蛇工厂</h3>
+                                <p>六套皮肤 · AI 蛇竞逐</p>
                             </div>
                             <span class="card-arrow" aria-hidden="true">↗</span>
                         </article>

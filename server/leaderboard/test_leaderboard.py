@@ -69,8 +69,10 @@ class LeaderboardTests(unittest.TestCase):
     def test_games_have_independent_rankings(self):
         self.store.submit("runner", "同名玩家", 300)
         self.store.submit("asteroids", "同名玩家", 900)
+        self.store.submit("snake", "同名玩家", 721)
         self.assertEqual(300, self.store.get_entries("runner")[0]["score"])
         self.assertEqual(900, self.store.get_entries("asteroids")[0]["score"])
+        self.assertEqual(721, self.store.get_entries("snake")[0]["score"])
 
 
 if __name__ == "__main__":

@@ -12,8 +12,9 @@
 | 丛雨快跑 | 横版跑酷 | `games/runner/` |
 | 起爆器危机 | 太空射击 | `games/asteroids/` |
 | 七海打饺 | 打砖块 | `games/breakout/` |
+| 柠檬蛇工厂 | AI 竞速贪吃蛇 | `games/snake/` |
 
-三款游戏均为本地静态资源运行；排行榜由独立的 Python 服务提供，并由 Nginx 通过同源 `/api/leaderboards/` 转发。
+四款游戏均为本地静态资源运行；排行榜由独立的 Python 服务提供，并由 Nginx 通过同源 `/api/leaderboards/` 转发。
 
 ## 本地预览
 

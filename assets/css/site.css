@@ -606,7 +606,7 @@ a:focus-visible,
 .cards
 {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
 
@@ -821,6 +821,81 @@ a:focus-visible,
     transform: translateX(-50%);
 }
 
+.visual-snake
+{
+    background:
+        radial-gradient(circle at 68% 40%, rgba(255, 221, 100, 0.2), transparent 27%),
+        radial-gradient(circle at 31% 73%, rgba(104, 229, 197, 0.13), transparent 24%),
+        linear-gradient(145deg, #13192a, #0a0d16);
+}
+
+.snake-card-body
+{
+    position: absolute;
+    top: 88px;
+    left: 64%;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #f5a7c8;
+    box-shadow:
+        -19px 4px 0 #df9acb,
+        -37px 13px 0 #c691d0,
+        -52px 28px 0 #aa8bd3,
+        -58px 48px 0 #8f87d3,
+        -52px 68px 0 #73b2ce,
+        -35px 81px 0 #68d5bd;
+    filter: drop-shadow(0 0 12px rgba(237, 143, 203, 0.38));
+}
+
+.snake-card-head
+{
+    position: absolute;
+    top: 52px;
+    left: calc(64% - 21px);
+    z-index: 2;
+    width: 61px;
+    height: 61px;
+    overflow: hidden;
+    border: 3px solid #f5a7c8;
+    border-radius: 50%;
+    background: #121625;
+    box-shadow: 0 10px 30px rgba(245, 144, 193, 0.32);
+}
+
+.snake-card-head img
+{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.snake-card-food
+{
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #ffe073;
+    box-shadow: 0 0 15px rgba(255, 224, 115, 0.8);
+}
+
+.snake-card-food-a
+{
+    top: 42px;
+    left: 27%;
+}
+
+.snake-card-food-b
+{
+    right: 19%;
+    bottom: 31px;
+    width: 6px;
+    height: 6px;
+    background: #71e3c2;
+    box-shadow: 0 0 13px rgba(113, 227, 194, 0.78);
+}
+
 .card-copy
 {
     padding: 18px 19px 21px;
@@ -989,7 +1064,7 @@ noscript
 
     .game-card:last-child
     {
-        grid-column: 1 / -1;
+        grid-column: auto;
     }
 }
 
@@ -1020,7 +1095,7 @@ noscript
     .tab-list
     {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 6px;
         margin: 0;
     }

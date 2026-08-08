@@ -26,6 +26,7 @@ GAME_RULES = {
     "runner": {"name": "丛雨快跑", "maximum_score": 10000000},
     "breakout": {"name": "七海打饺", "maximum_score": 1000000},
     "asteroids": {"name": "起爆器危机", "maximum_score": 10000000},
+    "snake": {"name": "柠檬蛇工厂", "maximum_score": 10000000},
 }
 MAX_NICKNAME_LENGTH = 16
 MAX_REQUEST_BYTES = 4096
