@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 小游戏投稿规范
+    url: https://github.com/StarlingLin/ciallo.org.cn/blob/main/docs/CONTRIBUTING_GAMES.md
+    about: 投稿前请先阅读目录、素材、许可证、体积和测试要求。
+  - name: 安全漏洞私密报告
+    url: https://github.com/StarlingLin/ciallo.org.cn/security/advisories/new
+    about: 请勿在公开 Issue 中披露可利用的漏洞或敏感信息。

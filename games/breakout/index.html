@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#090b13">
+    <title>七海打饺</title>
+    <link rel="stylesheet" href="game.css">
+    <link rel="stylesheet" href="/assets/css/leaderboard.css">
+</head>
+<body>
+    <main class="breakout-app" aria-label="七海打饺">
+        <header class="game-header" aria-label="本局状态">
+            <div class="stat-card">
+                <span>得分</span>
+                <strong id="score">00000</strong>
+            </div>
+            <div class="stat-card">
+                <span>关卡</span>
+                <strong id="level">01</strong>
+            </div>
+            <div class="stat-card lives-card">
+                <span>机会</span>
+                <strong id="lives" aria-label="剩余三次机会">♥ ♥ ♥</strong>
+            </div>
+        </header>
+
+        <section class="stage" aria-label="游戏区域">
+            <canvas id="game-canvas"
+                    width="800"
+                    height="500"
+                    tabindex="0"
+                    aria-label="七海打饺：七海举着案板接住旋转饺子。左右方向键或 A、D 移动，空格发球。">
+                当前浏览器不支持 Canvas。
+            </canvas>
+
+            <div class="stage-message" id="stage-message">
+                <p class="message-kicker" id="message-kicker">READY</p>
+                <strong id="message-title">准备好了吗？</strong>
+                <p id="message-detail">按空格或点击画面发球</p>
+                <button id="stage-action" type="button">开始打饺</button>
+            </div>
+        </section>
+
+        <div class="game-controls" aria-label="游戏控制">
+            <div class="direction-controls" aria-label="挡板方向">
+                <button class="control-button direction-button" id="left-button" type="button" aria-label="向左移动">
+                    <span aria-hidden="true">←</span>
+                    向左
+                </button>
+                <button class="control-button direction-button" id="right-button" type="button" aria-label="向右移动">
+                    向右
+                    <span aria-hidden="true">→</span>
+                </button>
+            </div>
+            <div class="action-controls">
+                <button class="control-button primary-button" id="launch-button" type="button">
+                    <span aria-hidden="true">●</span>
+                    <span id="launch-label">发球</span>
+                </button>
+                <button class="control-button" id="mute-button" type="button" aria-pressed="false">
+                    <span id="mute-icon" aria-hidden="true">♪</span>
+                    <span id="mute-label">声音开启</span>
+                </button>
+                <button class="control-button" id="reset-button" type="button">
+                    <span aria-hidden="true">↻</span>
+                    重新开始
+                </button>
+            </div>
+        </div>
+
+        <footer class="game-footer">
+            <p><kbd>←</kbd> <kbd>→</kbd> / <kbd>A</kbd> <kbd>D</kbd> 移动，<kbd>Space</kbd> 发球，<kbd>P</kbd> 暂停</p>
+            <span>本地素材 · CC0 代码上游</span>
+        </footer>
+    </main>
+
+    <div id="leaderboard-root" data-game-id="breakout" data-game-name="七海打饺"></div>
+    <script src="/assets/js/leaderboard.js?v=20260802-iframe-fix"></script>
+    <script src="game.config.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

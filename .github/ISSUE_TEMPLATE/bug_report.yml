@@ -1,0 +1,70 @@
+name: Bug 报告
+description: 报告主站、小游戏、排行榜或移动端交互中的可复现问题
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请先搜索现有 Issue，并移除截图、日志中的昵称、Cookie、IP 或其他隐私信息。
+  - type: dropdown
+    id: area
+    attributes:
+      label: 问题区域
+      options:
+        - 主站与标签切换
+        - 丛雨快跑
+        - 起爆器危机
+        - 七海打饺
+        - 排行榜
+        - 部署或文档
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 实际发生了什么？你原本预期什么？
+      placeholder: 请尽量简洁、具体。
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开……
+        2. 点击……
+        3. 出现……
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: 出现问题的地址
+      placeholder: https://ciallo.org.cn/#runner
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 设备与浏览器
+      placeholder: Windows 11 / Chrome 版本；或 iPhone / Safari 版本
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 截图、录屏或控制台信息
+      description: 可直接拖入文件；请先删除敏感信息。
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: 提交确认
+      options:
+        - label: 我已搜索现有 Issue，未发现同一问题。
+          required: true
+        - label: 我已确认这不是需要私密报告的安全漏洞。
+          required: true
+        - label: 我提供的内容不含 Cookie、密钥、真实玩家数据或其他隐私信息。
+          required: true

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#090b13">
+    <title>丛雨快跑</title>
+    <link rel="stylesheet" href="game.css">
+    <link rel="stylesheet" href="/assets/css/leaderboard.css">
+</head>
+<body>
+    <main class="runner-app" aria-label="丛雨快跑">
+        <header class="game-header">
+            <div class="scoreboard" aria-live="polite">
+                <span>得分</span>
+                <strong id="score">00000</strong>
+            </div>
+        </header>
+
+        <section class="stage" aria-label="游戏区域">
+            <canvas id="game-canvas"
+                    width="800"
+                    height="300"
+                    tabindex="0"
+                    aria-label="丛雨快跑游戏画面。按空格键或上方向键跳跃。">
+                当前浏览器不支持 Canvas。
+            </canvas>
+
+            <div class="stage-message" id="stage-message">
+                <div class="special-event" id="special-event" hidden>
+                    <img id="special-event-image"
+                         alt="角色哭泣的动态表情">
+                    <strong id="special-event-text">恭喜你，正好在0721分死亡！</strong>
+                </div>
+                <p id="stage-message-text">正在加载本地素材…</p>
+                <button id="stage-action" type="button" hidden>重新开始</button>
+            </div>
+        </section>
+
+        <div class="game-controls" aria-label="游戏控制">
+            <button class="control-button jump-button" id="jump-button" type="button">
+                <span aria-hidden="true">↑</span>
+                跳跃
+            </button>
+            <button class="control-button" id="mute-button" type="button" aria-pressed="false">
+                <span id="mute-icon" aria-hidden="true">♪</span>
+                <span id="mute-label">声音开启</span>
+            </button>
+            <button class="control-button" id="reset-button" type="button">
+                <span aria-hidden="true">↻</span>
+                重新开始
+            </button>
+        </div>
+
+        <footer class="game-footer">
+            <p><kbd>Space</kbd> / <kbd>↑</kbd> / 点击画面跳跃，<kbd>R</kbd> 重新开始</p>
+            <span>本地素材 · MIT 代码上游</span>
+        </footer>
+    </main>
+
+    <div id="leaderboard-root" data-game-id="runner" data-game-name="丛雨快跑"></div>
+    <script src="/assets/js/leaderboard.js?v=20260802-iframe-fix"></script>
+    <script src="game.config.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+name: 站点检查
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: 静态站点与排行榜测试
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 检查站点结构、资源和网络边界
+        run: python3 scripts/check_site.py .
+
+      - name: 检查 JavaScript 语法
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find assets games -type f -name '*.js' -print0)
+
+      - name: 运行排行榜单元测试
+        run: python3 -m unittest discover -s server/leaderboard -p 'test_*.py'
+
+      - name: 构建并复查公开发布文件
+        run: python3 scripts/build_site.py --source . --output _site
+
+      - name: 检查 Pull Request 提交信息
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 scripts/check_commit_messages.py --base "$BASE_SHA" --head "$HEAD_SHA"

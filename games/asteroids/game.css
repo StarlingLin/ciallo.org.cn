@@ -1,0 +1,252 @@
+:root {
+    color-scheme: dark;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #050711;
+    color: #f7f9ff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    background:
+        radial-gradient(circle at 16% 12%, rgba(80, 215, 255, .16), transparent 32rem),
+        radial-gradient(circle at 86% 68%, rgba(139, 104, 255, .13), transparent 34rem),
+        #050711;
+}
+
+button {
+    font: inherit;
+}
+
+.space-app {
+    width: min(100%, 1180px);
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: clamp(18px, 3vw, 38px);
+}
+
+.game-header {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.stat-card {
+    display: grid;
+    min-width: 94px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 16px;
+    background: rgba(14, 18, 34, .8);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .18);
+    text-align: center;
+}
+
+.stat-card span {
+    color: #9da8c8;
+    font-size: 12px;
+}
+
+.stat-card strong {
+    margin-top: 3px;
+    color: #f8fbff;
+    font-family: Consolas, "SFMono-Regular", monospace;
+    font-size: 20px;
+    letter-spacing: .08em;
+}
+
+.lives-card strong {
+    color: #72e5ff;
+    letter-spacing: .12em;
+}
+
+.stage {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(145, 173, 255, .2);
+    border-radius: 28px;
+    background: #070a17;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .36), inset 0 0 60px rgba(90, 119, 255, .06);
+}
+
+#game-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 8 / 5;
+    outline: none;
+    touch-action: none;
+}
+
+.stage-message {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    padding: 28px;
+    background: radial-gradient(circle at center, rgba(15, 21, 48, .72), rgba(3, 6, 17, .28) 48%, rgba(3, 6, 17, .7));
+    text-align: center;
+    transition: opacity .18s ease, visibility .18s ease;
+}
+
+.stage-message.is-hidden {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.message-kicker {
+    margin: 0 0 8px;
+    color: #71e4ff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .2em;
+}
+
+.stage-message strong {
+    font-size: clamp(30px, 5vw, 54px);
+    letter-spacing: -.04em;
+}
+
+.stage-message > p:not(.message-kicker) {
+    margin: 10px 0 18px;
+    color: #b5bfdc;
+}
+
+.stage-message button,
+.primary-button {
+    color: #07111d;
+    background: linear-gradient(135deg, #75e9ff, #9d8dff);
+    box-shadow: 0 12px 32px rgba(96, 220, 255, .25);
+}
+
+.stage-message button {
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 999px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.flight-controls,
+.action-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.control-button {
+    min-height: 48px;
+    padding: 0 16px;
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: 15px;
+    color: #dbe2f7;
+    background: rgba(18, 22, 40, .82);
+    cursor: pointer;
+    user-select: none;
+    touch-action: none;
+}
+
+.control-button:hover,
+.control-button:focus-visible,
+.control-button.is-active {
+    border-color: rgba(116, 229, 255, .55);
+    color: #fff;
+    background: rgba(43, 53, 90, .94);
+}
+
+.primary-button {
+    border-color: transparent;
+    font-weight: 800;
+}
+
+.thrust-button {
+    min-width: 92px;
+}
+
+.game-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 12px;
+    color: #8994b3;
+    font-size: 13px;
+}
+
+.game-footer p {
+    margin: 0;
+}
+
+kbd {
+    padding: 2px 6px;
+    border: 1px solid rgba(255, 255, 255, .15);
+    border-radius: 6px;
+    color: #dce7ff;
+    background: rgba(255, 255, 255, .05);
+    font-family: Consolas, monospace;
+}
+
+@media (max-width: 760px) {
+    .space-app {
+        padding: 14px;
+    }
+
+    .game-header {
+        justify-content: stretch;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 0;
+        padding-inline: 8px;
+    }
+
+    .game-controls {
+        display: grid;
+    }
+
+    .flight-controls,
+    .action-controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .action-controls {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .control-button {
+        padding-inline: 9px;
+    }
+
+    .game-footer {
+        display: grid;
+        line-height: 1.7;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+    }
+}

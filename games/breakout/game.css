@@ -1,0 +1,319 @@
+:root {
+    color-scheme: dark;
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --page-bg: #070910;
+    --panel-bg: rgba(17, 20, 31, .9);
+    --text: #f5f6fa;
+    --muted: #9ca2b3;
+    --line: rgba(255, 255, 255, .12);
+    --accent: #ff6fb5;
+    --accent-secondary: #8979ff;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    display: grid;
+    min-height: 100vh;
+    margin: 0;
+    padding: clamp(14px, 3vw, 30px);
+    place-items: center;
+    color: var(--text);
+    background:
+        radial-gradient(circle at 12% 5%, rgba(255, 111, 181, .15), transparent 24rem),
+        radial-gradient(circle at 90% 92%, rgba(137, 121, 255, .16), transparent 28rem),
+        var(--page-bg);
+}
+
+button,
+kbd {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+}
+
+.breakout-app {
+    width: min(100%, 920px);
+}
+
+.game-header,
+.game-controls,
+.direction-controls,
+.action-controls,
+.game-footer {
+    display: flex;
+    align-items: center;
+}
+
+.game-header {
+    justify-content: flex-end;
+    gap: 9px;
+    margin-bottom: 13px;
+}
+
+.stat-card {
+    min-width: 94px;
+    padding: 9px 13px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .04);
+    text-align: right;
+}
+
+.stat-card span {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.stat-card strong {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 19px;
+    letter-spacing: .07em;
+}
+
+.lives-card {
+    min-width: 112px;
+}
+
+.lives-card strong {
+    color: #ff91c7;
+    font-family: inherit;
+    letter-spacing: .16em;
+}
+
+.stage {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: clamp(16px, 3vw, 27px);
+    background: #0b0d17;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .42);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 8 / 5;
+    cursor: crosshair;
+    outline: none;
+    touch-action: none;
+}
+
+canvas:focus-visible {
+    box-shadow: inset 0 0 0 3px rgba(255, 111, 181, .72);
+}
+
+.stage-message {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    padding: 24px;
+    place-content: center;
+    justify-items: center;
+    background:
+        radial-gradient(circle at 50% 48%, rgba(137, 121, 255, .21), transparent 18rem),
+        rgba(7, 9, 16, .62);
+    text-align: center;
+    transition: opacity .18s ease;
+}
+
+.stage-message[hidden] {
+    display: none;
+}
+
+.message-kicker {
+    margin: 0 0 8px;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .22em;
+}
+
+.stage-message strong {
+    font-size: clamp(24px, 4vw, 40px);
+    letter-spacing: -.04em;
+}
+
+.stage-message > p:not(.message-kicker) {
+    margin: 9px 0 0;
+    color: #c5c9d6;
+    font-size: clamp(13px, 2vw, 17px);
+}
+
+.stage-message button {
+    margin-top: 17px;
+    padding: 10px 20px;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+    box-shadow: 0 10px 32px rgba(255, 111, 181, .27);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.game-controls {
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 13px;
+}
+
+.direction-controls,
+.action-controls {
+    gap: 9px;
+}
+
+.control-button {
+    display: inline-flex;
+    min-height: 44px;
+    padding: 0 15px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, .05);
+    cursor: pointer;
+    transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    touch-action: manipulation;
+    user-select: none;
+}
+
+.direction-button {
+    min-width: 104px;
+}
+
+.primary-button {
+    border-color: rgba(255, 111, 181, .3);
+    background: linear-gradient(135deg, rgba(255, 111, 181, .17), rgba(137, 121, 255, .18));
+}
+
+.control-button:hover {
+    border-color: rgba(255, 255, 255, .27);
+    background-color: rgba(255, 255, 255, .09);
+    transform: translateY(-1px);
+}
+
+.control-button:active,
+.control-button.is-pressed {
+    background-color: rgba(255, 111, 181, .17);
+    transform: translateY(1px);
+}
+
+.control-button:focus-visible,
+.stage-message button:focus-visible {
+    outline: 3px solid rgba(255, 111, 181, .45);
+    outline-offset: 2px;
+}
+
+.game-footer {
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.game-footer p {
+    margin: 0;
+}
+
+kbd {
+    display: inline-block;
+    min-width: 23px;
+    padding: 2px 6px;
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .05);
+    color: #e6e8ef;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 11px;
+    text-align: center;
+}
+
+@media (max-width: 760px) {
+    body {
+        padding: 12px;
+    }
+
+    .game-header {
+        justify-content: stretch;
+    }
+
+    .stat-card {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .game-controls {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .direction-controls,
+    .action-controls {
+        display: grid;
+    }
+
+    .direction-controls {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .action-controls {
+        grid-template-columns: 1.25fr 1fr 1fr;
+    }
+
+    .direction-button {
+        min-width: 0;
+    }
+
+    .game-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 470px) {
+    .stat-card {
+        padding: 8px 9px;
+    }
+
+    .stat-card strong {
+        font-size: 16px;
+    }
+
+    .lives-card {
+        min-width: 0;
+    }
+
+    .control-button {
+        min-height: 42px;
+        padding: 0 9px;
+        font-size: 12px;
+    }
+
+    .game-footer {
+        font-size: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+    }
+}

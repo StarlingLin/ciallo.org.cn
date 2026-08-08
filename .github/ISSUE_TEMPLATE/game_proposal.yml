@@ -1,0 +1,62 @@
+name: 游戏投稿 / 改造提案
+description: 在编写新游戏或大规模换皮之前说明玩法、代码来源与实现计划
+title: "[Game Proposal] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        大型投稿请先提案。维护者同意方向不等于提前保证合并，最终仍需通过自动检查、版权风险评估和人工试玩。
+  - type: input
+    id: game_name
+    attributes:
+      label: 游戏名称与建议 game-id
+      placeholder: 示例游戏 / example-game
+    validations:
+      required: true
+  - type: dropdown
+    id: origin
+    attributes:
+      label: 代码来源
+      options:
+        - 完全原创
+        - 基于开源项目改造
+        - 对仓库现有游戏进行较大改造
+    validations:
+      required: true
+  - type: textarea
+    id: gameplay
+    attributes:
+      label: 玩法与操作
+      description: 说明目标、核心循环和主要操作；如支持触屏可一并说明。
+    validations:
+      required: true
+  - type: textarea
+    id: upstream
+    attributes:
+      label: 上游代码与许可证
+      description: 原创请写“原创”；改造请提供仓库 URL、固定提交、作者和许可证。
+    validations:
+      required: true
+  - type: textarea
+    id: network
+    attributes:
+      label: 网络与数据使用
+      description: 默认应为纯静态、本地资源、无外部请求；如有例外必须完整说明。
+      value: 纯静态运行；不使用外部请求、广告、统计或追踪。
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: 投稿确认
+      options:
+        - label: 我已阅读小游戏 Pull Request 投稿规范。
+          required: true
+        - label: 我有权提交并允许本站公开托管所列代码与素材。
+          required: true
+        - label: 我会披露全部第三方来源，不把“非商业”视为无需授权。
+          required: true
+        - label: 我会压缩网页图片和音频，并遵守单文件与总体积限制。
+          required: true
+        - label: 我不会加入广告、统计、追踪、混淆脚本或未经说明的外部请求。
+          required: true

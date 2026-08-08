@@ -1,0 +1,27 @@
+# One blocked term per line. Matching uses NFKC, lowercase, leetspeak
+# replacement and removal of spaces/punctuation before comparison.
+傻逼
+傻比
+煞笔
+沙比
+草泥马
+操你
+艹你
+妈的
+尼玛
+卧槽
+我操
+狗日
+脑残
+废物
+垃圾人
+死全家
+fuck
+fock
+fucker
+fucking
+shit
+bitch
+asshole
+motherfucker
+nazi

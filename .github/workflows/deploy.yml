@@ -1,0 +1,92 @@
+name: 自动部署
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ciallo-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: 发布到 ciallo.org.cn
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://ciallo.org.cn/
+    steps:
+      - name: 检出仓库
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: 检查并构建公开站点
+        run: |
+          set -Eeuo pipefail
+          python3 scripts/check_site.py .
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find assets games -type f -name '*.js' -print0)
+          python3 -m unittest discover -s server/leaderboard -p 'test_*.py'
+          python3 scripts/build_site.py --source . --output _site
+          tar -C _site -czf site.tar.gz .
+          sha256sum site.tar.gz > site.tar.gz.sha256
+          printf '%s\n' "$GITHUB_SHA" > revision.txt
+
+      - name: 配置专用部署密钥
+        shell: bash
+        env:
+          DEPLOY_SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          set -Eeuo pipefail
+          : "${DEPLOY_SSH_PRIVATE_KEY:?缺少 production secret DEPLOY_SSH_PRIVATE_KEY}"
+          : "${DEPLOY_KNOWN_HOSTS:?缺少 production secret DEPLOY_KNOWN_HOSTS}"
+          : "${DEPLOY_HOST:?缺少 production variable DEPLOY_HOST}"
+          : "${DEPLOY_PORT:?缺少 production variable DEPLOY_PORT}"
+          : "${DEPLOY_USER:?缺少 production variable DEPLOY_USER}"
+
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_PRIVATE_KEY" | tr -d '\r' > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" | tr -d '\r' > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+
+      - name: 上传并发布
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          set -Eeuo pipefail
+          ssh_options=(
+            -i "$HOME/.ssh/id_ed25519"
+            -o BatchMode=yes
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=yes
+            -o ConnectTimeout=10
+          )
+
+          scp "${ssh_options[@]}" -P "$DEPLOY_PORT" \
+            site.tar.gz site.tar.gz.sha256 revision.txt \
+            "$DEPLOY_USER@$DEPLOY_HOST:incoming/"
+
+          ssh "${ssh_options[@]}" -p "$DEPLOY_PORT" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            'sudo -n /usr/local/sbin/deploy-ciallo-site'
+
+      - name: 清理部署密钥
+        if: always()
+        shell: bash
+        run: rm -f "$HOME/.ssh/id_ed25519"

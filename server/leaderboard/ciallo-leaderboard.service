@@ -1,0 +1,20 @@
+[Unit]
+Description=Ciallo Webgame Leaderboard
+After=network.target
+
+[Service]
+Type=simple
+User=ciallo-board
+Group=ciallo-board
+WorkingDirectory=/opt/ciallo-leaderboard
+ExecStart=/usr/bin/python3 /opt/ciallo-leaderboard/leaderboard_server.py --host 127.0.0.1 --port 18181 --database /var/lib/ciallo-leaderboard/leaderboard.sqlite3 --blocked-words /opt/ciallo-leaderboard/blocked_words.txt
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/ciallo-leaderboard
+
+[Install]
+WantedBy=multi-user.target
