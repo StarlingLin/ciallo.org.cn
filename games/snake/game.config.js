@@ -43,7 +43,9 @@ window.SNAKE_CONFIG = {
         edgeWeight: 6.8,
         edgePredictionWeight: 9.4,
         edgeEmergencyTurnMultiplier: 1.7,
-        edgeEmergencyInset: 8
+        edgeEmergencyInset: 8,
+        frenzyAfterSeconds: 600,
+        frenzySpeedMultiplier: 1.5
     },
 
     food: {

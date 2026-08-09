@@ -1,4 +1,4 @@
-# 柠檬蛇工厂换皮说明
+# 柚子蛇换皮说明
 
 ## 添加或替换皮肤
 
@@ -37,6 +37,8 @@
 - `bot.firstSpawnDelay`：第一条 AI 蛇出现前的秒数；
 - `bot.spawnIntervalMin` / `spawnIntervalMax`：之后的随机刷新间隔；
 - `bot.maximumAlive`：同时存活的 AI 上限。
+- `bot.frenzyAfterSeconds`：进入狂暴模式前的秒数，默认 600 秒。
+- `bot.frenzySpeedMultiplier`：狂暴模式下所有 AI 的额外速度倍率，默认 1.5。
 
 本地快速测试可以访问：
 

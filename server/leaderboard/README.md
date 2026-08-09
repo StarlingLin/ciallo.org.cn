@@ -5,15 +5,18 @@
 - `runner`：丛雨快跑；
 - `breakout`：七海打饺；
 - `asteroids`：起爆器危机；
-- `snake`：柠檬蛇工厂。
+- `snake`：柚子蛇；玩家总榜会记录角色皮肤和存活时长，另统计各角色累计总分。
 
-同一昵称在同一游戏只保留最高分。排名按照分数降序排列，同分时先达到该分数的玩家在前。数据库中每个游戏最多保存十条记录。
+同一昵称在同一游戏只保留最高分；柚子蛇同分时会保留存活更久的那一局。排名按照分数降序排列，柚子蛇以存活时长作为同分时的第一顺位，之后再按成绩达成时间排序。玩家榜每个游戏最多保存十条记录，角色累计总分表固定保留六个角色的汇总数据。
 
 ## API
 
 ```text
 GET  /api/leaderboards/{game}
 POST /api/leaderboards/{game}
+
+GET  /api/leaderboards/snake/totals
+POST /api/leaderboards/snake/totals
 ```
 
 提交示例：
@@ -24,6 +27,19 @@ POST /api/leaderboards/{game}
     "score": 721
 }
 ```
+
+柚子蛇的玩家成绩还需包含本局角色与存活秒数：
+
+```json
+{
+    "nickname": "Starling",
+    "score": 721,
+    "skin_id": "ena",
+    "survival_seconds": 88
+}
+```
+
+每局结束时，网页会独立向 `snake/totals` 提交角色、得分和存活秒数。该接口只累计六个角色的总得分、对局数和总存活时间，不保存昵称，也不受玩家成绩是否进入前十影响。
 
 昵称会在服务端执行长度、控制字符、网址、联系方式和屏蔽词检查。`blocked_words.txt` 可继续追加词条，修改后重启服务生效。
 

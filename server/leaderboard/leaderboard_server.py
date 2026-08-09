@@ -22,15 +22,26 @@ from socketserver import ThreadingMixIn
 from urllib.parse import unquote, urlparse
 
 
+SNAKE_SKINS = (
+    ("ena", "惠凪"),
+    ("anju", "杏珠"),
+    ("tsukimi", "月望"),
+    ("ririko", "莉莉子"),
+    ("miku", "美玖"),
+    ("nayuka", "那优花"),
+)
+SNAKE_SKIN_NAMES = dict(SNAKE_SKINS)
+
 GAME_RULES = {
     "runner": {"name": "丛雨快跑", "maximum_score": 10000000},
     "breakout": {"name": "七海打饺", "maximum_score": 1000000},
     "asteroids": {"name": "起爆器危机", "maximum_score": 10000000},
-    "snake": {"name": "柠檬蛇工厂", "maximum_score": 10000000},
+    "snake": {"name": "柚子蛇", "maximum_score": 10000000},
 }
 MAX_NICKNAME_LENGTH = 16
 MAX_REQUEST_BYTES = 4096
 ENTRY_LIMIT = 10
+MAX_SURVIVAL_SECONDS = 86400
 CONTACT_PATTERN = re.compile(
     r"(?:https?://|www\.|@|(?:qq|wx|vx|微信|微\s*信)\s*[:：]?\s*\d|\d{7,})",
     re.IGNORECASE,
@@ -151,10 +162,46 @@ class LeaderboardStore(object):
                 )
                 """
             )
+            columns = {
+                row["name"]
+                for row in connection.execute("PRAGMA table_info(leaderboard_entries)")
+            }
+            if "skin_id" not in columns:
+                connection.execute(
+                    "ALTER TABLE leaderboard_entries ADD COLUMN skin_id TEXT"
+                )
+            if "survival_seconds" not in columns:
+                connection.execute(
+                    "ALTER TABLE leaderboard_entries ADD COLUMN survival_seconds INTEGER"
+                )
             connection.execute(
                 """
                 CREATE INDEX IF NOT EXISTS leaderboard_rank_index
                 ON leaderboard_entries(game_key, score DESC, achieved_at ASC, id ASC)
+                """
+            )
+            connection.execute(
+                """
+                CREATE INDEX IF NOT EXISTS leaderboard_rank_v2_index
+                ON leaderboard_entries(
+                    game_key,
+                    score DESC,
+                    survival_seconds DESC,
+                    achieved_at ASC,
+                    id ASC
+                )
+                """
+            )
+            connection.execute(
+                """
+                CREATE TABLE IF NOT EXISTS snake_character_totals
+                (
+                    skin_id TEXT PRIMARY KEY,
+                    total_score INTEGER NOT NULL DEFAULT 0,
+                    total_survival_seconds INTEGER NOT NULL DEFAULT 0,
+                    play_count INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT NOT NULL
+                )
                 """
             )
             connection.commit()
@@ -176,16 +223,45 @@ class LeaderboardStore(object):
         return score
 
     @staticmethod
+    def _validate_snake_details(
+        game_key,
+        skin_id,
+        survival_seconds,
+        required=False,
+    ):
+        if game_key != "snake":
+            return None, None
+        if not required and skin_id is None and survival_seconds is None:
+            return None, None
+        if not isinstance(skin_id, str) or skin_id not in SNAKE_SKIN_NAMES:
+            raise ValidationError("invalid_skin", "角色皮肤不在允许范围内。")
+        if (
+            isinstance(survival_seconds, bool)
+            or not isinstance(survival_seconds, int)
+            or survival_seconds < 0
+            or survival_seconds > MAX_SURVIVAL_SECONDS
+        ):
+            raise ValidationError("invalid_survival_time", "存活时长超出允许范围。")
+        return skin_id, survival_seconds
+
+    @staticmethod
     def _rows_to_entries(rows):
-        return [
-            {
+        entries = []
+        for index, row in enumerate(rows):
+            skin_id = row["skin_id"]
+            entry = {
                 "rank": index + 1,
                 "nickname": row["nickname"],
                 "score": row["score"],
                 "achieved_at": row["achieved_at"],
             }
-            for index, row in enumerate(rows)
-        ]
+            if skin_id in SNAKE_SKIN_NAMES:
+                entry["skin_id"] = skin_id
+                entry["skin_name"] = SNAKE_SKIN_NAMES[skin_id]
+            if row["survival_seconds"] is not None:
+                entry["survival_seconds"] = row["survival_seconds"]
+            entries.append(entry)
+        return entries
 
     def get_entries(self, game_key):
         self._validate_game(game_key)
@@ -193,10 +269,14 @@ class LeaderboardStore(object):
         try:
             rows = connection.execute(
                 """
-                SELECT nickname, score, achieved_at
+                SELECT nickname, score, achieved_at, skin_id, survival_seconds
                 FROM leaderboard_entries
                 WHERE game_key = ?
-                ORDER BY score DESC, achieved_at ASC, id ASC
+                ORDER BY
+                    score DESC,
+                    COALESCE(survival_seconds, -1) DESC,
+                    achieved_at ASC,
+                    id ASC
                 LIMIT ?
                 """,
                 (game_key, ENTRY_LIMIT),
@@ -205,9 +285,21 @@ class LeaderboardStore(object):
         finally:
             connection.close()
 
-    def submit(self, game_key, nickname_value, score_value):
+    def submit(
+        self,
+        game_key,
+        nickname_value,
+        score_value,
+        skin_id=None,
+        survival_seconds=None,
+    ):
         self._validate_game(game_key)
         score = self._validate_score(game_key, score_value)
+        skin_id, survival_seconds = self._validate_snake_details(
+            game_key,
+            skin_id,
+            survival_seconds,
+        )
         nickname, nickname_key = self.nickname_filter.validate(nickname_value)
         now = utc_now()
         connection = self._connect()
@@ -218,7 +310,7 @@ class LeaderboardStore(object):
             connection.execute("BEGIN IMMEDIATE")
             existing = connection.execute(
                 """
-                SELECT id, score
+                SELECT id, score, survival_seconds
                 FROM leaderboard_entries
                 WHERE game_key = ? AND nickname_key = ?
                 """,
@@ -226,14 +318,29 @@ class LeaderboardStore(object):
             ).fetchone()
 
             if existing is not None:
-                if score > existing["score"]:
+                improved = score > existing["score"]
+                if (
+                    score == existing["score"]
+                    and survival_seconds is not None
+                    and survival_seconds > (existing["survival_seconds"] or -1)
+                ):
+                    improved = True
+                if improved:
                     connection.execute(
                         """
                         UPDATE leaderboard_entries
-                        SET nickname = ?, score = ?, achieved_at = ?
+                        SET nickname = ?, score = ?, achieved_at = ?,
+                            skin_id = ?, survival_seconds = ?
                         WHERE id = ?
                         """,
-                        (nickname, score, now, existing["id"]),
+                        (
+                            nickname,
+                            score,
+                            now,
+                            skin_id,
+                            survival_seconds,
+                            existing["id"],
+                        ),
                     )
                     accepted = True
                     reason = "improved"
@@ -242,22 +349,50 @@ class LeaderboardStore(object):
             else:
                 tenth = connection.execute(
                     """
-                    SELECT score
+                    SELECT score, survival_seconds
                     FROM leaderboard_entries
                     WHERE game_key = ?
-                    ORDER BY score DESC, achieved_at ASC, id ASC
+                    ORDER BY
+                        score DESC,
+                        COALESCE(survival_seconds, -1) DESC,
+                        achieved_at ASC,
+                        id ASC
                     LIMIT 1 OFFSET ?
                     """,
                     (game_key, ENTRY_LIMIT - 1),
                 ).fetchone()
-                if tenth is None or score > tenth["score"]:
+                qualifies = tenth is None or score > tenth["score"]
+                if (
+                    tenth is not None
+                    and score == tenth["score"]
+                    and survival_seconds is not None
+                    and survival_seconds > (tenth["survival_seconds"] or -1)
+                ):
+                    qualifies = True
+                if qualifies:
                     connection.execute(
                         """
                         INSERT INTO leaderboard_entries
-                            (game_key, nickname, nickname_key, score, achieved_at)
-                        VALUES (?, ?, ?, ?, ?)
+                            (
+                                game_key,
+                                nickname,
+                                nickname_key,
+                                score,
+                                achieved_at,
+                                skin_id,
+                                survival_seconds
+                            )
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
                         """,
-                        (game_key, nickname, nickname_key, score, now),
+                        (
+                            game_key,
+                            nickname,
+                            nickname_key,
+                            score,
+                            now,
+                            skin_id,
+                            survival_seconds,
+                        ),
                     )
                     accepted = True
                     reason = "entered"
@@ -271,7 +406,11 @@ class LeaderboardStore(object):
                       SELECT id
                       FROM leaderboard_entries
                       WHERE game_key = ?
-                      ORDER BY score DESC, achieved_at ASC, id ASC
+                       ORDER BY
+                           score DESC,
+                           COALESCE(survival_seconds, -1) DESC,
+                           achieved_at ASC,
+                           id ASC
                       LIMIT ?
                   )
                 """,
@@ -296,6 +435,87 @@ class LeaderboardStore(object):
             "rank": rank,
             "entries": entries,
         }
+
+    def get_character_totals(self):
+        connection = self._connect()
+        try:
+            rows = connection.execute(
+                """
+                SELECT skin_id, total_score, total_survival_seconds, play_count
+                FROM snake_character_totals
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+
+        stored = {row["skin_id"]: row for row in rows}
+        totals = []
+        for order, (skin_id, skin_name) in enumerate(SNAKE_SKINS):
+            row = stored.get(skin_id)
+            totals.append({
+                "skin_id": skin_id,
+                "skin_name": skin_name,
+                "total_score": row["total_score"] if row else 0,
+                "total_survival_seconds": row["total_survival_seconds"] if row else 0,
+                "play_count": row["play_count"] if row else 0,
+                "_order": order,
+            })
+        totals.sort(key=lambda item: (-item["total_score"], item["_order"]))
+        for rank, item in enumerate(totals, 1):
+            item["rank"] = rank
+            del item["_order"]
+        return totals
+
+    def record_character_score(self, skin_id, score_value, survival_seconds):
+        score = self._validate_score("snake", score_value)
+        skin_id, survival_seconds = self._validate_snake_details(
+            "snake",
+            skin_id,
+            survival_seconds,
+            required=True,
+        )
+        now = utc_now()
+        connection = self._connect()
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            existing = connection.execute(
+                "SELECT skin_id FROM snake_character_totals WHERE skin_id = ?",
+                (skin_id,),
+            ).fetchone()
+            if existing is None:
+                connection.execute(
+                    """
+                    INSERT INTO snake_character_totals
+                        (
+                            skin_id,
+                            total_score,
+                            total_survival_seconds,
+                            play_count,
+                            updated_at
+                        )
+                    VALUES (?, ?, ?, 1, ?)
+                    """,
+                    (skin_id, score, survival_seconds, now),
+                )
+            else:
+                connection.execute(
+                    """
+                    UPDATE snake_character_totals
+                    SET total_score = total_score + ?,
+                        total_survival_seconds = total_survival_seconds + ?,
+                        play_count = play_count + 1,
+                        updated_at = ?
+                    WHERE skin_id = ?
+                    """,
+                    (score, survival_seconds, now, skin_id),
+                )
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
+        return self.get_character_totals()
 
 
 class SlidingWindowRateLimiter(object):
@@ -338,18 +558,26 @@ class LeaderboardHandler(BaseHTTPRequestHandler):
         return forwarded or self.client_address[0]
 
     def _rate_limit(self, action):
-        maximum = 10 if action == "post" else 120
+        maximum = {"post": 10, "total": 30, "get": 120}.get(action, 10)
         key = (action, self._client_key())
         if not self.server.rate_limiter.allow(key, maximum, 60):
             raise ValidationError("rate_limited", "请求过于频繁，请稍后再试。", 429)
 
     @staticmethod
-    def _game_from_path(path):
+    def _leaderboard_route(path):
         prefix = "/api/leaderboards/"
         if not path.startswith(prefix):
-            return None
-        game_key = unquote(path[len(prefix):]).strip("/")
-        return game_key or None
+            return None, None
+        parts = [
+            part
+            for part in unquote(path[len(prefix):]).strip("/").split("/")
+            if part
+        ]
+        if len(parts) == 1:
+            return parts[0], None
+        if parts == ["snake", "totals"]:
+            return "snake", "totals"
+        return None, None
 
     def do_GET(self):
         try:
@@ -357,16 +585,26 @@ class LeaderboardHandler(BaseHTTPRequestHandler):
             if parsed.path == "/healthz":
                 self._send_json(200, {"ok": True, "games": sorted(GAME_RULES.keys())})
                 return
-            game_key = self._game_from_path(parsed.path)
+            game_key, action = self._leaderboard_route(parsed.path)
             if game_key is None:
                 raise ValidationError("not_found", "接口不存在。", 404)
             self._rate_limit("get")
+            if action == "totals":
+                self._send_json(200, {
+                    "game": "snake",
+                    "game_name": GAME_RULES["snake"]["name"],
+                    "character_totals": self.server.store.get_character_totals(),
+                })
+                return
             entries = self.server.store.get_entries(game_key)
-            self._send_json(200, {
+            payload = {
                 "game": game_key,
                 "game_name": GAME_RULES[game_key]["name"],
                 "entries": entries,
-            })
+            }
+            if game_key == "snake":
+                payload["character_totals"] = self.server.store.get_character_totals()
+            self._send_json(200, payload)
         except ValidationError as error:
             self._send_json(error.status, {"error": error.code, "message": error.message})
         except Exception:
@@ -375,10 +613,10 @@ class LeaderboardHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             parsed = urlparse(self.path)
-            game_key = self._game_from_path(parsed.path)
+            game_key, action = self._leaderboard_route(parsed.path)
             if game_key is None:
                 raise ValidationError("not_found", "接口不存在。", 404)
-            self._rate_limit("post")
+            self._rate_limit("total" if action == "totals" else "post")
 
             content_type = self.headers.get("Content-Type", "").lower()
             if not content_type.startswith("application/json"):
@@ -403,10 +641,25 @@ class LeaderboardHandler(BaseHTTPRequestHandler):
             if not isinstance(payload, dict):
                 raise ValidationError("invalid_json", "请求内容格式不正确。")
 
+            if action == "totals":
+                totals = self.server.store.record_character_score(
+                    payload.get("skin_id"),
+                    payload.get("score"),
+                    payload.get("survival_seconds"),
+                )
+                self._send_json(200, {
+                    "accepted": True,
+                    "game": "snake",
+                    "character_totals": totals,
+                })
+                return
+
             result = self.server.store.submit(
                 game_key,
                 payload.get("nickname"),
                 payload.get("score"),
+                payload.get("skin_id"),
+                payload.get("survival_seconds"),
             )
             result["game"] = game_key
             self._send_json(200, result)

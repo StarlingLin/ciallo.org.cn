@@ -1,6 +1,6 @@
 # 素材说明
 
-《柠檬蛇工厂》使用站点维护者提供的六张角色头像：
+《柚子蛇》使用站点维护者提供的六张角色头像：
 
 - `assets/images/skins/cropped/ena.webp`：惠凪；
 - `assets/images/skins/cropped/anju.webp`：杏珠；

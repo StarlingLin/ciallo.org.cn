@@ -70,6 +70,7 @@
     let muted = false;
     let aiDebugDeaths = [];
     let bgmStarted = false;
+    let frenzyActivated = false;
 
     const camera = { x: 0, y: 0 };
     const pointer = {
@@ -167,7 +168,11 @@
         const progress = clamp(curveTime / duration, 0, 1);
         const initial = personality.initialSpeedMultiplier || 1;
         const maximum = personality.maximumSpeedMultiplier || initial;
-        return initial + (maximum - initial) * progress;
+        const personalityMultiplier = initial + (maximum - initial) * progress;
+        const frenzyMultiplier = elapsed >= config.bot.frenzyAfterSeconds
+            ? config.bot.frenzySpeedMultiplier
+            : 1;
+        return personalityMultiplier * frenzyMultiplier;
     }
 
     function getSnakeSpeed(snake)
@@ -307,6 +312,8 @@
         particles = [];
         snakes = [];
         aiDebugDeaths = [];
+        frenzyActivated = false;
+        document.body.classList.remove("is-frenzy");
         canvas.dataset.aiDeaths = "[]";
         pointer.active = false;
         keys.clear();
@@ -337,6 +344,8 @@
         startPanel.hidden = true;
         pausePanel.hidden = true;
         gameOverPanel.hidden = true;
+        frenzyActivated = false;
+        document.body.classList.remove("is-frenzy");
         canvas.focus({ preventScroll: true });
         updateHud();
     }
@@ -1078,7 +1087,10 @@
         pausePanel.hidden = true;
         keys.clear();
         updateHud();
-        window.CialloLeaderboard?.reportScore(Math.floor(score));
+        window.CialloLeaderboard?.reportScore(Math.floor(score), {
+            skinId: selectedSkinId,
+            survivalSeconds: Math.floor(elapsed)
+        });
     }
 
     function createParticleBurst(x, y, color, count, lifetime, speed)
@@ -1138,6 +1150,13 @@
     function update(deltaTime)
     {
         elapsed += deltaTime;
+        if (!frenzyActivated && elapsed >= config.bot.frenzyAfterSeconds)
+        {
+            frenzyActivated = true;
+            document.body.classList.add("is-frenzy");
+            showToast("狂暴模式！所有 AI 蛇速度提升 50%");
+            playTone("defeat");
+        }
         survivalAccumulator += deltaTime;
         if (survivalAccumulator >= 1)
         {
